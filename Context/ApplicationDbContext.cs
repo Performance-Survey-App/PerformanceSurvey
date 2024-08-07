@@ -9,7 +9,7 @@ namespace PerformanceSurvey.Context
                   : base(options) { }
 
         public DbSet<Department> departments { get; set; }
-
+ 
         public DbSet<User> users { get; set; }
 
         public DbSet<DepartmentQuestion> department_questions { get; set; }

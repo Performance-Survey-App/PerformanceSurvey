@@ -24,8 +24,7 @@ namespace PerformanceSurvey.Controllers
         //https://localhost:7164/api/Users/Create
         // POST: api/Users/Create
         [HttpPost("Create")]
-        public async Task<ActionResult<User>> CreateUser(UserDto
-         request)
+        public async Task<ActionResult<User>> CreateUser(UserRequest request)
         {
 
 

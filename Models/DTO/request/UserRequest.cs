@@ -2,7 +2,7 @@
 
 namespace PerformanceSurvey.Models
 {
-    public class UserDto { 
+    public class UserRequest { 
 
       [Key]
     public int UserId { get; set; }
