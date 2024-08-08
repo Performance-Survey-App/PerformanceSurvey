@@ -9,7 +9,7 @@ namespace PerformanceSurvey.Controllers
 
 {
 
-    [Route("api/Users/")]
+    [Route("api/user/")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -21,9 +21,9 @@ namespace PerformanceSurvey.Controllers
             _logger = logger;
 
         }
-        //https://localhost:7164/api/Users/Create
-        // POST: api/Users/Create
-        [HttpPost("Create")]
+        //https://localhost:5008/api/user/create
+        // POST: api/User/create
+        [HttpPost("create")]
         public async Task<ActionResult<User>> CreateUser(UserRequest request)
         {
 
@@ -33,26 +33,25 @@ namespace PerformanceSurvey.Controllers
             User user = new User()
             {
 
-                UserId = request.UserId,
-                Name = request.Name, 
-                 CreatedAt = DateTime.UtcNow,
-                   DepartmentId = request.DepartmentId,
-                    Password = request.Password,
-                     UserEmail = request.UserEmail,
-                      UserType = request.UserType, 
+               
+                name = request.Name, 
+                 createdAt = DateTime.UtcNow,
+                    password = request.Password,
+                     userEmail = request.UserEmail,
+                      userType = request.UserType, 
 
                    
             };
             try
             {
-                user.CreatedAt = DateTime.UtcNow;
+                user.createdAt = DateTime.UtcNow;
                 _context.users.Add(user);
                 await _context.SaveChangesAsync();
 
 
 
-                _logger.LogInformation("User with ID {UserID} created successfully.", user.UserId);
-                return CreatedAtAction("GetUser", new { id = user.UserId }, user);
+                _logger.LogInformation("User with ID {UserID} created successfully.", user.id);
+                return CreatedAtAction("GetUser", new { id = user.id }, user);
                 //return StatusCode(200, "this is ok");
             }
             catch (Exception ex)
@@ -68,8 +67,8 @@ namespace PerformanceSurvey.Controllers
         [HttpGet("get/{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
         {
-            var user = await _context.users.Include(u => u.Department)
-                                           .FirstOrDefaultAsync(u => u.UserId == id);
+            var user = await _context.users.Include(u => u.departmentId)
+                                           .FirstOrDefaultAsync(u => u.id == id);
 
             if (user == null)
             {
@@ -81,7 +80,7 @@ namespace PerformanceSurvey.Controllers
 
         // PUT:https://localhost:7164/api/Users/update/4
         [HttpPut("update/{id}")]
-        public async Task<IActionResult> PutUser(int id, UserDto userDto)
+        public async Task<IActionResult> PutUser(int id, UserRequest userDto)
         {
 
             try
@@ -93,11 +92,11 @@ namespace PerformanceSurvey.Controllers
                 return NotFound("User not found.");
             }
 
-            user.Name = userDto.Name;
-            user.UserEmail = userDto.UserEmail;
-            user.Password = userDto.Password; // Consider hashing the password
-            user.UserType = userDto.UserType;
-            user.UpdatedAt = DateTime.UtcNow;
+            user.name = userDto.Name;
+            user.userEmail = userDto.UserEmail;
+            user.password = userDto.Password; // Consider hashing the password
+            user.userType = userDto.UserType;
+            user.updatedAt = DateTime.UtcNow;
 
              _context.Entry(user).State = EntityState.Modified;
            
@@ -117,7 +116,7 @@ namespace PerformanceSurvey.Controllers
         [HttpGet("getAll")]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
-            var users = await _context.users.Include(u => u.Department).ToListAsync();
+            var users = await _context.users.Include(u => u.departmentId).ToListAsync();
 
             return users;
         }
@@ -145,8 +144,38 @@ namespace PerformanceSurvey.Controllers
 
         private bool UserExists(int id)
         {
-            return _context.users.Any(e => e.UserId == id);
+            return _context.users.Any(e => e.id == id);
         }
+         public async Task EnsureUserExistsAsync(string email, User newUser)
+    {
+        var user = await _context.users.SingleOrDefaultAsync(u => u.userEmail == email);
+
+        if (user == null)
+        {
+            _logger.LogInformation("User with email {Email} not found. Creating a new user.", email);
+            await RegisterUserAsync(newUser);
+        }
+        else
+        {
+            _logger.LogInformation("User with email {Email} already exists.", email);
+        }
+    }
+
+  private async Task RegisterUserAsync(User user)
+    {
+        try
+        {
+            _context.users.Add(user);
+            await _context.SaveChangesAsync();
+            _logger.LogInformation("User with email {Email} registered successfully.", user.userEmail);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while registering a new user with email {Email}.", user.userEmail);
+            throw;
+        }
+    }
+
     }
 
 }
