@@ -33,8 +33,8 @@ namespace PerformanceSurvey.Models
 
         public DateTime? createdAt { get; set; } = DateTime.UtcNow;
 
-        public DateTime? updatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? updatedAt { get; set; } 
 
-        public DateTime? deletedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? deletedAt { get; set; } 
     }
 }

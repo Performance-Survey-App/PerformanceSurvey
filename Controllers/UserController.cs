@@ -9,7 +9,7 @@ namespace PerformanceSurvey.Controllers
 
 {
 
-    [Route("api/users/")]
+    [Route("api/user/")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -21,8 +21,8 @@ namespace PerformanceSurvey.Controllers
             _logger = logger;
 
         }
-        //https://localhost:5008/api/users/create
-        // POST: api/Users/create
+        //https://localhost:5008/api/user/create
+        // POST: api/User/create
         [HttpPost("create")]
         public async Task<ActionResult<User>> CreateUser(UserRequest request)
         {
@@ -146,6 +146,36 @@ namespace PerformanceSurvey.Controllers
         {
             return _context.users.Any(e => e.id == id);
         }
+         public async Task EnsureUserExistsAsync(string email, User newUser)
+    {
+        var user = await _context.users.SingleOrDefaultAsync(u => u.userEmail == email);
+
+        if (user == null)
+        {
+            _logger.LogInformation("User with email {Email} not found. Creating a new user.", email);
+            await RegisterUserAsync(newUser);
+        }
+        else
+        {
+            _logger.LogInformation("User with email {Email} already exists.", email);
+        }
+    }
+
+  private async Task RegisterUserAsync(User user)
+    {
+        try
+        {
+            _context.users.Add(user);
+            await _context.SaveChangesAsync();
+            _logger.LogInformation("User with email {Email} registered successfully.", user.userEmail);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while registering a new user with email {Email}.", user.userEmail);
+            throw;
+        }
+    }
+
     }
 
 }
